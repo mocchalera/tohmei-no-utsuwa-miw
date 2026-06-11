@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>透明の器 — Music Interactive Web</title>
+<meta name="description" content="誰もいない街で、あまつぶ数えて暇つぶす。楽曲「透明の器」のための一枚の窓ガラス。">
+<link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+
+<canvas id="scene"></canvas>
+
+<div id="lyrics" aria-hidden="true"></div>
+
+<div id="hud">
+  <div id="title">透明の器</div>
+  <div id="counter" class="hidden">かぞえた あまつぶ <span id="count">0</span></div>
+  <div id="hint" class="hidden">ガラスをなぞる ・ しずくにふれて数える</div>
+</div>
+
+<div id="transport" class="hidden">
+  <button id="playpause" aria-label="再生 / 一時停止">
+    <svg viewBox="0 0 24 24" width="20" height="20">
+      <path id="icon-pause" d="M8 6 h3 v12 h-3 z M14 6 h3 v12 h-3 z"/>
+      <path id="icon-play" d="M8 6 L18 12 L8 18 z" class="hidden"/>
+    </svg>
+  </button>
+
+  <div id="seek">
+    <div id="seek-track"><div id="seek-fill"></div></div>
+    <span id="time">0:00</span>
+  </div>
+
+  <div id="vol">
+    <button id="mute" aria-label="ミュート">
+      <svg viewBox="0 0 24 24" width="18" height="18">
+        <path id="icon-vol" d="M4 9 h4 l5 -4 v14 l-5 -4 h-4 z M16 8 q3 4 0 8 M18.5 6 q5 6 0 12"/>
+        <path id="icon-mute" d="M4 9 h4 l5 -4 v14 l-5 -4 h-4 z M16 9 l5 6 M21 9 l-5 6" class="hidden"/>
+      </svg>
+    </button>
+    <div id="vol-track"><div id="vol-fill"></div></div>
+  </div>
+</div>
+
+<div id="start" class="overlay">
+  <div class="start-inner">
+    <div class="drop-wrap"><div class="drop"></div></div>
+    <h1>透明の器</h1>
+    <p class="sub">Music Interactive Web</p>
+    <p class="invite">しずくに ふれる</p>
+  </div>
+</div>
+
+<div id="fin" class="overlay hidden">
+  <div class="fin-inner">
+    <p id="fin-count">あまつぶ、<span>0</span> つぶ。</p>
+    <p class="fin-line">水たまりの中 消えてった</p>
+    <button id="replay">もういちど、雨</button>
+  </div>
+</div>
+
+<audio id="audio" src="assets/tohmei_no_utsuwa.mp3" preload="auto" crossorigin="anonymous"></audio>
+
+<script src="main.js?v=4"></script>
+</body>
+</html>
