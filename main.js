@@ -791,8 +791,13 @@ function tickTimeline() {
   state.time = audio.currentTime;
   while (timelineIdx < TIMELINE.length && TIMELINE[timelineIdx].t <= state.time) {
     const entry = TIMELINE[timelineIdx];
-    if (entry.text) showLyric(entry.text);
-    if (entry.event) fireEvent(entry.event);
+    // タブ非表示や画面ロック中も音は進む。戻ったとき、
+    // 過ぎてしまった行は一括表示せず静かに読み飛ばす
+    const late = state.time - entry.t;
+    if (late < 3) {
+      if (entry.text) showLyric(entry.text);
+      if (entry.event) fireEvent(entry.event);
+    }
     timelineIdx++;
   }
 }
@@ -802,12 +807,20 @@ function tickTimeline() {
 const counterEl = document.getElementById('counter');
 const countEl = document.getElementById('count');
 
+let sliderDrag = false;  // スライダー操作中はガラスに触れない
+
+// トランスポートバー上の操作はガラスへ届かせない
+function onUI(e) {
+  return !!(e.target && e.target.closest && e.target.closest('#transport'));
+}
+
 function onPointerMove(e) {
   const p = state.pointer;
   p.px = p.x; p.py = p.y;
   p.x = e.clientX; p.y = e.clientY;
   p.lastMove = performance.now();
   if (!state.started || state.ended) return;
+  if (sliderDrag || onUI(e)) return;
   // ガラスをぬぐう
   const dx = p.x - p.px, dy = p.y - p.py;
   const dist = Math.hypot(dx, dy);
@@ -819,6 +832,7 @@ function onPointerMove(e) {
 
 function onPointerDown(e) {
   if (!state.started || state.ended) return;
+  if (sliderDrag || onUI(e)) return;
   const x = e.clientX, y = e.clientY;
 
   // しずくに触れたら、数える
@@ -995,22 +1009,26 @@ function seekToRatio(ratio) {
 function dragBar(track, onRatio) {
   const handle = (e) => {
     const rect = track.getBoundingClientRect();
-    const cx = (e.touches ? e.touches[0].clientX : e.clientX);
-    onRatio((cx - rect.left) / rect.width);
+    onRatio((e.clientX - rect.left) / rect.width);
     wakeTransport();
   };
   track.addEventListener('pointerdown', (e) => {
     e.stopPropagation();
+    e.preventDefault();
+    sliderDrag = true;
     handle(e);
-    try { track.setPointerCapture(e.pointerId); } catch (_) {}
+    // 細いトラック上で pointermove を待つと指がすぐ外れる。
+    // ドラッグ中は window で追いかける
     const move = (ev) => handle(ev);
     const up = () => {
-      try { track.releasePointerCapture(e.pointerId); } catch (_) {}
-      track.removeEventListener('pointermove', move);
-      track.removeEventListener('pointerup', up);
+      sliderDrag = false;
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
     };
-    track.addEventListener('pointermove', move);
-    track.addEventListener('pointerup', up);
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
   });
 }
 
